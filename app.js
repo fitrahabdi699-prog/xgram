@@ -28,8 +28,15 @@ import {
 //     match /users/{uid}         { allow read: if request.auth != null; allow write: if request.auth.uid == uid; }
 //     match /usernames/{name}    { allow read: if request.auth != null; allow write: if request.auth != null; }
 //
-//     // Contacts (setiap user baca/tulis subkoleksi miliknya sendiri)
-//     match /contacts/{uid}/list/{tid} { allow read, write: if request.auth.uid == uid; }
+//     // Contacts (setiap user baca koleksi miliknya sendiri; tulis dibuka untuk
+//     // user terotentikasi manapun karena unfollow/terima-teman butuh menulis
+//     // ke koleksi milik LAWAN juga, mis. waktu A batal-ikuti B, A perlu hapus
+//     // dokumen contacts/B/list/A. Tanpa ini, operasi itu gagal sebagian/total
+//     // dan kedua sisi jadi tidak sinkron.
+//     match /contacts/{uid}/list/{tid} {
+//       allow read:  if request.auth.uid == uid;
+//       allow write: if request.auth != null;
+//     }
 //
 //     // Friend requests
 //     match /friendRequests/{reqId} { allow read, write: if request.auth != null; }
@@ -97,7 +104,7 @@ function fmtTime(ts) {
 }
 
 // ─── Routing ──────────────────────────────────────────────────────
-const PANELS = ["panel-auth","panel-home","panel-new-chat","panel-chat-room"];
+const PANELS = ["panel-splash","panel-auth","panel-home","panel-new-chat","panel-chat-room"];
 function show(name) {
   PANELS.forEach(p => { const n = el(p); if (n) n.style.display = "none"; });
   const t = el("panel-" + name);
@@ -196,7 +203,23 @@ async function registerIpAccount(ipKey, uid) {
   }
 }
 
-// ─── App state ────────────────────────────────────────────────────
+// ─── Logout ─────────────────────────────────────────────────────────
+// Dipakai bareng oleh tombol Logout di Settings.
+async function doLogout() {
+  // Reset flag supaya onAuthStateChanged tidak di-skip
+  authTransitionInProgress = false;
+  await cleanupCurrentSessionListeners();
+  try {
+    await signOut(auth);
+    currentUser = null;
+    lastUid     = null;
+    toast("Sudah logout.");
+    show("auth");
+  } catch (err) {
+    console.error("Logout error:", err);
+    toast("Gagal logout: " + (err?.message || err));
+  }
+}
 let currentUser     = null;
 let lastUid          = null;  // uid terakhir yang ditangani onAuthStateChanged (deteksi ganti akun)
 let authTransitionInProgress = false; // true selagi performLogin/performRegister jalan manual
@@ -402,12 +425,23 @@ async function unblockUser(targetUid) {
 async function unfriendUser(targetUid) {
   // Hapus kontak di kedua sisi; TIDAK memblokir — masih bisa minta teman lagi
   // Sembunyikan chat dari daftar kedua sisi
-  await Promise.allSettled([
+  const results = await Promise.allSettled([
     deleteDoc(doc(db, "contacts", currentUser.uid, "list", targetUid)),
     deleteDoc(doc(db, "contacts", targetUid, "list", currentUser.uid)),
     setDoc(doc(db, "chats", chatIdFor(currentUser.uid, targetUid)),
       { hiddenFor: arrayUnion(currentUser.uid) }, { merge: true }),
   ]);
+  const failed = results.find(r => r.status === "rejected");
+  if (failed) {
+    // Jangan biarkan gagal diam-diam — kalau salah satu sisi gagal terhapus,
+    // status pertemanan jadi tidak sinkron antara kedua user (sumber bug
+    // "cannot read properties of undefined" saat user lain mencari/lihat profil).
+    console.error("unfriendUser: salah satu operasi gagal:", failed.reason);
+    throw new Error(
+      "Batal ikuti tidak sepenuhnya berhasil (kemungkinan rules Firestore koleksi " +
+      "'contacts' belum dibuka untuk tulis dua arah). Cek konsol untuk detail."
+    );
+  }
 }
 
 async function isBlocked(targetUid) {
@@ -514,21 +548,27 @@ function reqId(fromUid, toUid) { return `${fromUid}_${toUid}`; }
 
 // status: 'none' | 'contact' | 'sent' | 'received' | 'blocking' | 'blocked_by'
 async function getRelationship(targetUid) {
+  if (!currentUser || !targetUid) return { status: "none" };
+
   // Cek blokir dulu
-  if (await isBlocked(targetUid)) return { status: "blocking" };
-  if (await isBlockedBy(targetUid)) return { status: "blocked_by" };
+  if (await isBlocked(targetUid).catch(() => false)) return { status: "blocking" };
+  if (await isBlockedBy(targetUid).catch(() => false)) return { status: "blocked_by" };
 
-  if (await isAlreadyContact(targetUid)) return { status: "contact" };
+  if (await isAlreadyContact(targetUid).catch(() => false)) return { status: "contact" };
 
-  const sentSnap = await getDoc(doc(db, "friendRequests", reqId(currentUser.uid, targetUid)));
-  if (sentSnap.exists() && sentSnap.data().status === "pending") {
-    return { status: "sent" };
-  }
+  try {
+    const sentSnap = await getDoc(doc(db, "friendRequests", reqId(currentUser.uid, targetUid)));
+    if (sentSnap.exists() && sentSnap.data()?.status === "pending") {
+      return { status: "sent" };
+    }
+  } catch (e) { console.warn("Cek friendRequest terkirim gagal:", e); }
 
-  const recvSnap = await getDoc(doc(db, "friendRequests", reqId(targetUid, currentUser.uid)));
-  if (recvSnap.exists() && recvSnap.data().status === "pending") {
-    return { status: "received", req: { id: recvSnap.id, ...recvSnap.data() } };
-  }
+  try {
+    const recvSnap = await getDoc(doc(db, "friendRequests", reqId(targetUid, currentUser.uid)));
+    if (recvSnap.exists() && recvSnap.data()?.status === "pending") {
+      return { status: "received", req: { id: recvSnap.id, ...recvSnap.data() } };
+    }
+  } catch (e) { console.warn("Cek friendRequest masuk gagal:", e); }
 
   return { status: "none" };
 }
@@ -547,7 +587,7 @@ async function sendFriendRequest(targetUser) {
 }
 
 async function acceptFriendRequest(reqIdToAccept, fromUid, fromUsername, fromDisplayName) {
-  await Promise.all([
+  const results = await Promise.allSettled([
     setDoc(doc(db, "contacts", currentUser.uid, "list", fromUid), {
       uid: fromUid, username: fromUsername,
       displayName: fromDisplayName || fromUsername,
@@ -559,6 +599,14 @@ async function acceptFriendRequest(reqIdToAccept, fromUid, fromUsername, fromDis
       addedAt: serverTimestamp(),
     }),
   ]);
+  const failed = results.find(r => r.status === "rejected");
+  if (failed) {
+    console.error("acceptFriendRequest gagal menulis kontak:", failed.reason);
+    throw new Error(
+      "Gagal menyimpan pertemanan (kemungkinan rules Firestore untuk koleksi 'contacts' " +
+      "belum dibuka untuk tulis dua arah). Cek konsol untuk detail."
+    );
+  }
   await deleteDoc(doc(db, "friendRequests", reqIdToAccept));
 
   // Munculkan kembali riwayat chat jika sebelumnya tersembunyi (setelah batal ikuti / re-follow)
@@ -1096,7 +1144,10 @@ function renderSettingsTab(content) {
   });
 
   // — Logout —
-  el("btn-logout-2")?.addEventListener("click", () => el("btn-logout")?.click());
+  el("btn-logout-2")?.addEventListener("click", () => {
+    if (!confirm("Yakin mau logout?")) return;
+    doLogout();
+  });
 }
 
 function renderSavedAccountsList() {
@@ -1214,15 +1265,6 @@ function initAuth() {
     }
   });
 
-  el("btn-logout")?.addEventListener("click", async () => {
-    await cleanupCurrentSessionListeners();
-    try {
-      await signOut(auth);
-      toast("Sudah logout.");
-    } catch (err) {
-      toast("Gagal logout: " + err.message);
-    }
-  });
 }
 
 // ─── New Chat (cari & tambah teman) ────────────────────────────────
@@ -1230,6 +1272,7 @@ let foundUserData = null;
 
 function renderSearchResultButton(rel, found) {
   const wrap = el("user-found");
+  if (!wrap || !rel || !found) return;
 
   if (rel.status === "blocking") {
     // Kita memblokir mereka — tampilkan opsi buka blokir
@@ -1425,7 +1468,7 @@ function initNewChat() {
 
     } catch (err) {
       console.error("Search error:", err);
-      toast("❌ Gagal mencari: " + err.message);
+      toast("❌ Gagal mencari: " + (err?.message || "Terjadi kesalahan tidak terduga (lihat console)."));
     } finally {
       btn.disabled    = false;
       btn.textContent = "Cari";
@@ -1729,7 +1772,6 @@ function initNav() {
 // ─── Boot ───────────────────────────────────────────────────────────
 function main() {
   setTheme(currentTheme);
-  // splash dihapus
 
   initNav();
   initAuth();
@@ -1764,9 +1806,14 @@ function main() {
     }
   });
 
-  // Langsung ke auth/home tanpa splash — Firebase listener handle redirect
-  splashDone = true;
-  show("auth"); // sementara tampil auth, listener redirect ke home kalau sudah login
+  // Tampilkan splash "XGRAM" dulu selama 3 detik, baru pindah ke auth/home
+  // sesuai status login yang sudah didapat dari Firebase di waktu itu.
+  show("splash");
+  setTimeout(() => {
+    splashDone = true;
+    if (resolvedUser) { show("home"); setTab("chats"); }
+    else                show("auth");
+  }, 3000);
 }
 
 main();

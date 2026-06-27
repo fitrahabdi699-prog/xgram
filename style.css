@@ -926,3 +926,30 @@ body.dark .toast { background: rgba(30,58,138,.92); border-color: rgba(96,165,25
   .content-area { overflow-y: auto; }
   .chat-log { overflow-y: auto; }
 }
+/* ══════════════════════════════════════════════════════════════
+   UNREAD BADGE & PREVIEW BOLD
+   ══════════════════════════════════════════════════════════════ */
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary, #5b6af0);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.preview--unread {
+  font-weight: 600;
+  color: var(--text, #1a1a2e);
+}
+
+.dark .preview--unread {
+  color: var(--text, #e8eaf6);
+}
