@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Xgram</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="./icon.png" type="image/png" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ══ SPLASH ══════════════════════════════════════════════════ -->
+  <section id="panel-splash" class="panel panel--center">
+    <div class="splash-wrap">
+      <div class="splash-text-wrap">
+        <!-- SVG Circular Progress Ring -->
+        <svg class="splash-ring-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="splashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#4f46e5"/>
+              <stop offset="50%"  stop-color="#8b5cf6"/>
+              <stop offset="100%" stop-color="#818cf8"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <circle class="splash-ring-track" cx="100" cy="100" r="90"/>
+          <!-- Progress arc -->
+          <circle class="splash-ring-progress" cx="100" cy="100" r="90"/>
+          <!-- Dot at leading edge -->
+          <circle class="splash-ring-dot" cx="100" cy="10" r="4"/>
+        </svg>
+        <!-- Title -->
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="splash-title">XGRAM</div>
+          <div class="splash-tagline">Connect · Share · Now</div>
+        </div>
+      </div>
+      <!-- Loading dots -->
+      <div class="splash-dots">
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ AUTH ════════════════════════════════════════════════════ -->
+  <section id="panel-auth" class="panel panel--center">
+    <div class="auth-card">
+
+      <div class="auth-brand">
+        <div class="auth-brand__logo">X</div>
+        <div class="auth-brand__name">Xgram</div>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="btn-open-login"    class="auth-tab active" type="button">Masuk</button>
+        <button id="btn-open-register" class="auth-tab"        type="button">Daftar</button>
+        <div class="auth-tab__ink" id="tab-ink"></div>
+      </div>
+
+      <h2 id="auth-title" class="auth-title">Selamat Datang</h2>
+      <p class="auth-subtitle">Masuk untuk melanjutkan ke Xgram</p>
+
+      <form id="auth-form" class="auth-form" autocomplete="off" novalidate>
+        <input type="hidden" id="auth-mode" value="login" />
+
+        <div class="field">
+          <label class="field__label" for="auth-email">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+            Email
+          </label>
+          <input id="auth-email" class="field__input" type="email" placeholder="email@contoh.com" autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="auth-pass">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Password
+          </label>
+          <input id="auth-pass" class="field__input" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div class="field" id="username-field" style="display:none;">
+          <label class="field__label" for="auth-username">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Username
+          </label>
+          <input id="auth-username" class="field__input" type="text" placeholder="contoh: budi_123" autocomplete="username" />
+        </div>
+
+        <button id="auth-submit" class="btn btn--primary btn--full" type="submit">
+          <span id="auth-submit-text">Masuk</span>
+          <svg class="btn__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <p class="auth-hint">Username hanya untuk pencarian teman · Max 2 akun per perangkat</p>
+    </div>
+  </section>
+
+  <!-- ══ HOME ════════════════════════════════════════════════════ -->
+  <section id="panel-home" class="panel" style="display:none;">
+    <div class="app-shell">
+
+      <header class="topbar">
+        <div class="topbar__brand">
+          <div class="topbar__logo">X</div>
+          <span id="home-title" class="topbar__title">Chats</span>
+        </div>
+        <div class="topbar__actions">
+          <button id="btn-new-chat" class="topbar__fab" type="button" aria-label="New Chat" title="Chat Baru">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="home-content" class="content-area"></div>
+
+      <nav class="bottom-nav">
+        <button data-tab="chats"    class="nav-btn active" type="button">
+          <span class="nav-btn__indicator"></span>
+          <svg class="nav-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-btn__label">Chats</span>
+        </button>
+        <button data-tab="contacts" class="nav-btn" type="button">
+          <span class="nav-btn__indicator"></span>
+          <svg class="nav-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-btn__label">Contacts</span>
+          <span class="nav-badge" id="contact-badge"></span>
+        </button>
+        <button data-tab="profile"  class="nav-btn" type="button">
+          <span class="nav-btn__indicator"></span>
+          <svg class="nav-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span class="nav-btn__label">Profile</span>
+        </button>
+        <button data-tab="settings" class="nav-btn" type="button">
+          <span class="nav-btn__indicator"></span>
+          <svg class="nav-btn__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-btn__label">Settings</span>
+        </button>
+      </nav>
+
+    </div>
+  </section>
+
+  <!-- ══ NEW CHAT ═════════════════════════════════════════════════ -->
+  <section id="panel-new-chat" class="panel" style="display:none;">
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="new-chat-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="topbar__title">Cari Teman</span>
+        <div style="width:40px"></div>
+      </header>
+
+      <div class="content-area" style="padding:16px;">
+        <div class="search-box">
+          <svg class="search-box__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="search-username" class="search-box__input" type="text" placeholder="Masukkan username…" />
+          <button id="btn-search-user" class="search-box__btn" type="button">Cari</button>
+        </div>
+
+        <div id="newchat-result" style="display:none; margin-top:16px;">
+          <div class="user-result-card">
+            <div class="urc-avatar" id="urc-avatar">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            </div>
+            <div class="urc-meta">
+              <div class="urc-name" id="newchat-result-title">—</div>
+              <div class="urc-bio"  id="newchat-result-bio">—</div>
+            </div>
+            <div class="urc-badge">Pengguna</div>
+          </div>
+          <div style="height:12px"></div>
+          <div id="user-found"></div>
+          <div id="user-not-found" style="display:none;" class="not-found">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            <p>User tidak ditemukan</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CHAT ROOM ════════════════════════════════════════════════ -->
+  <section id="panel-chat-room" class="panel" style="display:none;">
+    <div class="app-shell">
+
+      <header class="topbar topbar--chat">
+        <button id="chatroom-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="chat-peer">
+          <div class="chat-peer__avatar" id="chatroom-peer-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="chat-peer__info">
+            <div id="chatroom-username" class="chat-peer__name">Username</div>
+            <div id="chatroom-status"   class="chat-peer__status">
+              <span class="status-dot"></span>Online
+            </div>
+          </div>
+        </div>
+        <button class="topbar__more" id="chatroom-more" type="button" title="Lihat profil">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </button>
+      </header>
+
+      <div id="chat-log" class="chat-log"></div>
+
+      <div class="composer">
+        <input id="chat-attach" type="file" accept="image/*" hidden />
+        <input id="chat-attach-doc" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv,application/zip,application/x-rar-compressed,application/json" hidden />
+        <button id="btn-attach" class="composer__btn" type="button" title="Lampirkan foto atau dokumen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <div class="composer__input-wrap">
+          <textarea id="chat-input" class="composer__textarea" placeholder="Pesan…" rows="1"></textarea>
+        </div>
+        <button id="btn-mic" class="composer__btn" type="button" title="Voice note">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button id="send-message" class="composer__send" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ VIEW PROFILE ════════════════════════════════════════════ -->
+  <section id="panel-view-profile" class="panel" style="display:none;">
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="vp-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="topbar__title">Profil</span>
+        <div style="width:40px"></div>
+      </header>
+      <div class="content-area vp-body">
+        <div class="vp-hero">
+          <div id="vp-photo" class="vp-photo"></div>
+          <div id="vp-name" class="vp-name">—</div>
+          <div id="vp-username" class="vp-username">@—</div>
+        </div>
+        <div class="vp-section">
+          <div class="vp-section-label">Bio</div>
+          <div id="vp-bio" class="vp-bio-text">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CREATE GROUP ═════════════════════════════════════════════ -->
+  <section id="panel-create-group" class="panel" style="display:none;">
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="cg-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="topbar__title">Buat Grup</span>
+        <div style="width:40px"></div>
+      </header>
+      <div class="content-area" style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <!-- Group Photo + Name -->
+        <div class="cg-header">
+          <div class="cg-photo-wrap">
+            <div id="cg-photo-preview" class="cg-photo-preview">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.4"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            </div>
+            <button id="cg-photo-btn" class="cg-photo-edit" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <input type="file" id="cg-photo-input" accept="image/*" hidden />
+          </div>
+          <input id="cg-name" class="field__input cg-name-input" type="text" placeholder="Nama grup…" maxlength="60" />
+        </div>
+
+        <!-- Members -->
+        <div class="cg-members-section">
+          <div class="cg-section-label">Tambah Anggota <span id="cg-selected-count" class="cg-badge">0 dipilih</span></div>
+          <div id="cg-members-list" class="cg-members-list"></div>
+        </div>
+
+        <button id="cg-submit" class="btn btn--primary btn--full" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Buat Grup
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ GROUP ROOM ════════════════════════════════════════════════ -->
+  <section id="panel-group-room" class="panel" style="display:none;">
+    <div class="app-shell">
+      <header class="topbar topbar--chat">
+        <button id="gr-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="chat-peer" style="cursor:pointer;" id="gr-info-btn">
+          <div id="gr-avatar" class="chat-peer__avatar gr-avatar"></div>
+          <div class="chat-peer__info">
+            <div id="gr-name" class="chat-peer__name">Grup</div>
+            <div id="gr-member-count" class="chat-peer__status">— anggota</div>
+          </div>
+        </div>
+        <div style="width:40px"></div>
+      </header>
+
+      <div id="gr-log" class="chat-log"></div>
+
+      <div class="composer">
+        <input id="gr-attach-input" type="file" accept="image/*" hidden />
+        <input id="gr-attach-doc-input" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.json,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv,application/zip,application/x-rar-compressed,application/json" hidden />
+        <button id="gr-attach-btn" class="composer__btn" type="button" title="Lampirkan foto atau dokumen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <div class="composer__input-wrap">
+          <textarea id="gr-chat-input" class="composer__textarea" placeholder="Pesan…" rows="1"></textarea>
+        </div>
+        <button id="gr-mic" class="composer__btn" type="button" title="Voice note">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button id="gr-send" class="composer__send" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ GROUP INFO ════════════════════════════════════════════════ -->
+  <section id="panel-group-info" class="panel" style="display:none;">
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="gi-back" class="topbar__back" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="topbar__title">Info Grup</span>
+        <div style="width:40px"></div>
+      </header>
+      <div class="content-area gi-body">
+        <div class="gi-hero">
+          <div class="gi-photo-wrap">
+            <div id="gi-photo" class="gi-photo"></div>
+            <button id="gi-edit-photo" class="gi-photo-edit" style="display:none;" type="button" title="Ganti foto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <input type="file" id="gi-photo-input" accept="image/*" hidden />
+          </div>
+          <div id="gi-name-wrap" style="display:flex;align-items:center;gap:6px;justify-content:center;">
+            <div id="gi-name" class="gi-name">—</div>
+            <button id="gi-edit-name-btn" style="display:none;background:none;border:none;cursor:pointer;color:var(--primary);padding:4px;" title="Ubah nama grup">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+          <div id="gi-name-form" style="display:none;padding:8px 24px;width:100%;box-sizing:border-box;">
+            <div style="display:flex;gap:8px;">
+              <input id="gi-name-input" class="field__input" type="text" placeholder="Nama grup baru…" maxlength="60" style="flex:1;" />
+              <button id="gi-name-save" class="btn btn--primary btn--sm" type="button">Simpan</button>
+              <button id="gi-name-cancel" class="btn btn--secondary btn--sm" type="button">Batal</button>
+            </div>
+          </div>
+          <div id="gi-count" class="gi-count">— anggota</div>
+        </div>
+
+        <!-- Tambah member (admin only) -->
+        <div id="gi-add-member-section" style="display:none;padding:0 16px 8px;">
+          <button id="gi-add-member-btn" class="btn btn--secondary btn--full" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Tambah Anggota
+          </button>
+          <div id="gi-add-member-form" style="display:none;margin-top:10px;">
+            <div id="gi-add-member-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button id="gi-add-member-submit" class="btn btn--primary" type="button" style="flex:1;">Tambahkan</button>
+              <button id="gi-add-member-cancel" class="btn btn--secondary" type="button">Batal</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gi-section-label">Anggota</div>
+        <div id="gi-members" class="gi-members"></div>
+
+        <!-- Keluar Grup -->
+        <div style="padding:16px;">
+          <button id="gi-leave-btn" class="btn btn--full" style="background:rgba(220,38,38,0.10);color:#ef4444;border:1px solid rgba(220,38,38,0.22);font-weight:600;" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Keluar dari Grup
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
